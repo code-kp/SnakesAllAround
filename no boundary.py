@@ -51,6 +51,19 @@ def pause():
                     main()
            
 
+def checkThis(snakeHead):
+    if snakeHead[0] > screenW:
+        snakeHead[0] -= screenW
+    elif snakeHead[0] < 0:
+        snakeHead[0] += screenW
+
+    if snakeHead[1] > screenH:
+        snakeHead[1] -= screenH
+    elif snakeHead[1] < 0:
+        snakeHead[1] += screenH
+
+    return snakeHead
+
 def gameLoop():
     gameExit = False
     gameOver = False
@@ -152,16 +165,14 @@ def gameLoop():
             posBlue_x += changeBlue_x
             posBlue_y += changeBlue_y
 
+        if not flagB:
+            if posRed_x >= screenW or posRed_x <0 or posRed_y >= screenH or posRed_y <0:
+                gameOver = True
 
-        if posRed_x >= screenW or posRed_x <0 or posRed_y >= screenH or posRed_y <0:
-            gameOver = True
-        if posBlue_x >= screenW or posBlue_x <0 or posBlue_y >= screenH or posBlue_y <0:
-            gameOver = True
-
-        if gameOver:
-            continue
-
-
+        if not flagR:
+            if posBlue_x >= screenW or posBlue_x <0 or posBlue_y >= screenH or posBlue_y <0:
+                gameOver = True
+    
         gameScreen.fill(white)
 
         if flagR and flagB:
@@ -177,17 +188,23 @@ def gameLoop():
             gameScreen.fill(Blue, rect = [fruitBlueX,fruitBlueY,fruitSize,fruitSize])
             gameScreen.fill(Blue, rect = [posBlue_x,posBlue_y,head,head])
         pgame.display.update()
-
+        
         snakeHeadRed = []
         if flagR:
             snakeHeadRed.append(posRed_x)
             snakeHeadRed.append(posRed_y)
+            if flagB:
+                snakeHeadRed = checkThis(snakeHeadRed)
+                posRed_x,posRed_y = snakeHeadRed[0],snakeHeadRed[1]
             snakeListRed.append(snakeHeadRed)
         
         snakeHeadBlue = []
         if flagB:
             snakeHeadBlue.append(posBlue_x)
             snakeHeadBlue.append(posBlue_y)
+            if flagR:
+                snakeHeadBlue = checkThis(snakeHeadBlue)
+                posBlue_x,posBlue_y = snakeHeadBlue[0],snakeHeadBlue[1]
             snakeListBlue.append(snakeHeadBlue)
 
         if flagR:
@@ -243,9 +260,9 @@ def gameLoop():
             continue
 
         if flagR:
-            pgame.draw.circle(gameScreen,white,(int(posRed_x + head/2),int(posRed_y + head/2)),2)
+            pgame.draw.circle(gameScreen,white,(int(posRed_x + head/2),int(posRed_y + head/2)),1)
         if flagB:
-            pgame.draw.circle(gameScreen,white,(int(posBlue_x + head/2),int(posBlue_y + head/2)),2)
+            pgame.draw.circle(gameScreen,white,(int(posBlue_x + head/2),int(posBlue_y + head/2)),1)
 
     
         if flagR:
