@@ -18,17 +18,38 @@ head = 10
 fruitSize = 15
 toMove = 10
 
-font = pgame.font.SysFont(None,25)
+fps = 20
 
 def buildSnake(snakelead,col):
     for xy in snakelead:
         gameScreen.fill(col,rect = [xy[0],xy[1],head,head])
 
-def showMsg(msg,color,placing = [screenW/2,screenH/2]):
-    toBeShown = font.render(msg,True,color)
+font = pgame.font.SysFont(None,25)
+largeFont = pgame.font.SysFont(None,45)
+
+def showMsg(msg,color,placing = [screenW/2,screenH/2],size = font):
+    toBeShown = size.render(msg,True,color)
     msgRect = toBeShown.get_rect()
     msgRect.center = placing[0],placing[1]
     gameScreen.blit(toBeShown,msgRect)
+  
+def pause():
+    paused = True
+    showMsg("Paused",black,size = largeFont)
+    showMsg("'C' to continue or 'Q' to quit",black,[screenW/2,screenH/2+25])
+    pgame.display.update()
+    while paused:
+        for event in pgame.event.get():
+            if event.type == pgame.QUIT:
+                pgame.quit()
+                quit()
+            elif event.type == pgame.KEYDOWN:
+                if event.key == pgame.K_c:
+                    paused = False
+                    break
+                elif event.key == pgame.K_q:
+                    main()
+           
 
 def gameLoop():
     gameExit = False
@@ -50,6 +71,11 @@ def gameLoop():
     fruitBlueX = round(random.randrange(0,screenW-fruitSize)/10.0)*10.0
     fruitBlueY = round(random.randrange(0,screenH-fruitSize)/10.0)*10.0
 
+    countRed = 0
+    countBlue = 0
+    flagR = True
+    flagB = True
+
     while fruitRedX == fruitBlueX:
         fruitBlueX = round(random.randrange(0,screenW-fruitSize)/10.0)*10.0 
     
@@ -65,9 +91,7 @@ def gameLoop():
                         break
                 if event.type == pgame.KEYDOWN:
                     if event.key == pgame.K_q:
-                        gameExit = True
-                        gameOver = False
-                        break
+                        main()
                     elif event.key == pgame.K_p:
                         gameLoop()
                     
@@ -94,10 +118,7 @@ def gameLoop():
                     changeRed_y=toMove
                     changeRed_x = 0
                 elif event.key == pgame.K_p:
-                    changeRed_x = 0
-                    changeRed_y = 0
-                    changeBlue_x = 0
-                    changeBlue_y = 0
+                    pause()
                 elif event.key == pgame.K_l:
                     changeBlue_x=toMove
                     changeBlue_y = 0
@@ -124,88 +145,122 @@ def gameLoop():
 
         if gameOver:
             continue
-        
-        posRed_x += changeRed_x
-        posRed_y += changeRed_y
-        posBlue_x += changeBlue_x
-        posBlue_y += changeBlue_y
+
+        if changeRed_x == 0 and changeRed_y == 0:
+            countRed += 1
+        if changeBlue_x == 0 and changeBlue_y ==0:
+            countBlue += 1
+          
+        if flagR:
+            posRed_x += changeRed_x
+            posRed_y += changeRed_y
+
+        if flagB:
+            posBlue_x += changeBlue_x
+            posBlue_y += changeBlue_y
 
         gameScreen.fill(white)
-        showMsg("Score : "+str((snakeLengthRed-1 + snakeLengthBlue-1)*5),blue,[50,20])
-        gameScreen.fill(red, rect = [fruitRedX,fruitRedY,fruitSize,fruitSize])
-        gameScreen.fill(red, rect = [posRed_x,posRed_y,head,head])
-        gameScreen.fill(Blue, rect = [fruitBlueX,fruitBlueY,fruitSize,fruitSize])
-        gameScreen.fill(Blue, rect = [posBlue_x,posBlue_y,head,head])
+
+        if flagR and flagB:
+            showMsg("Score : "+str((snakeLengthRed-1 + snakeLengthBlue-1)*10),blue,[50,20])
+        else:
+            showMsg("Score : "+str((snakeLengthRed-1 + snakeLengthBlue-1)*5),blue,[50,20])
+        
+        if flagR:
+            gameScreen.fill(red, rect = [fruitRedX,fruitRedY,fruitSize,fruitSize])
+            gameScreen.fill(red, rect = [posRed_x,posRed_y,head,head])
+
+        if flagB:
+            gameScreen.fill(Blue, rect = [fruitBlueX,fruitBlueY,fruitSize,fruitSize])
+            gameScreen.fill(Blue, rect = [posBlue_x,posBlue_y,head,head])
         pgame.display.update()
 
         snakeHeadRed = []
-        snakeHeadRed.append(posRed_x)
-        snakeHeadRed.append(posRed_y)
-        snakeListRed.append(snakeHeadRed)
+        if flagR:
+            snakeHeadRed.append(posRed_x)
+            snakeHeadRed.append(posRed_y)
+            snakeListRed.append(snakeHeadRed)
+        
         snakeHeadBlue = []
-        snakeHeadBlue.append(posBlue_x)
-        snakeHeadBlue.append(posBlue_y)
-        snakeListBlue.append(snakeHeadBlue)
+        if flagB:
+            snakeHeadBlue.append(posBlue_x)
+            snakeHeadBlue.append(posBlue_y)
+            snakeListBlue.append(snakeHeadBlue)
 
-        if snakeLengthRed < len(snakeListRed):
-            del snakeListRed[0]
-        if snakeLengthBlue < len(snakeListBlue):
-            del snakeListBlue[0]
+        if flagR:
+            if snakeLengthRed < len(snakeListRed):
+                del snakeListRed[0]
+        if flagB:
+            if snakeLengthBlue < len(snakeListBlue):
+                del snakeListBlue[0]
 
-        if snakeHeadRed == snakeHeadBlue:
-            gameOver = True
-            showMsg("Crashed to Others !!",red)
-            pgame.display.update()
-            continue
-    
-        
-        for xy in snakeListRed[:-1]:
-            if xy == snakeHeadRed:
+        if flagB and flagR:
+            if snakeHeadRed == snakeHeadBlue:
                 gameOver = True
-                showMsg("You Crashed to Yourself !!",red)
+                showMsg("Crashed to Others !!",red)
                 pgame.display.update()
-                break
-            for axy in snakeListBlue[:-1]:
-                if axy == snakeHeadRed:
+                continue
+        
+        if flagR:
+            for xy in snakeListRed[:-1]:
+                if xy == snakeHeadRed:
                     gameOver = True
-                    showMsg("Red Crashed to blue !!",red)
+                    showMsg("You Crashed to Yourself !!",red)
                     pgame.display.update()
                     break
-
-        for xy in snakeListBlue[:-1]:
-            if xy == snakeHeadBlue:
-                gameOver = True
-                showMsg("You Crashed to Yourself !!",Blue)
-                pgame.display.update()
-                break
-            for axy in snakeListRed[:-1]:
-                if axy == snakeHeadBlue:
+                if flagB:
+                    for axy in snakeListBlue[:-1]:
+                        if axy == snakeHeadRed:
+                            gameOver = True
+                            showMsg("Red Crashed to blue !!",red)
+                            pgame.display.update()
+                            break
+        
+        if flagB:
+            for xy in snakeListBlue[:-1]:
+                if xy == snakeHeadBlue:
                     gameOver = True
-                    showMsg("Blue Crashed to red !!",Blue)
+                    showMsg("You Crashed to Yourself !!",Blue)
                     pgame.display.update()
                     break
+                if flagR:
+                    for axy in snakeListRed[:-1]:
+                        if axy == snakeHeadBlue:
+                            gameOver = True
+                            showMsg("Blue Crashed to red !!",Blue)
+                            pgame.display.update()
+                            break
         
-        
-        buildSnake(snakeListRed,red)
-        buildSnake(snakeListBlue,Blue)
-        
-        if posRed_x >= fruitRedX and posRed_x <= fruitRedX+head:
-            if posRed_y >= fruitRedY and posRed_y <= fruitRedY+head:
-                snakeLengthRed += 1
-                fruitRedX = round(random.randrange(0,screenW-head)/10.0)*10.0
-                fruitRedY = round(random.randrange(0,screenH-head)/10.0)*10.0
-        if posBlue_x >= fruitBlueX and posBlue_x <= fruitBlueX+head:
-            if posBlue_y >= fruitBlueY and posBlue_y <= fruitBlueY+head:
-                snakeLengthBlue += 1
-                fruitBlueX = round(random.randrange(0,screenW-head)/10.0)*10.0
-                fruitBlueY = round(random.randrange(0,screenH-head)/10.0)*10.0
+        if flagR:
+            buildSnake(snakeListRed,red)
+        if flagB:
+            buildSnake(snakeListBlue,Blue)
 
-        while fruitRedX == fruitBlueX:
-            fruitBlueX = round(random.randrange(0,screenW-fruitSize)/10.0)*10.0
+        if flagR:
+            if posRed_x >= fruitRedX and posRed_x <= fruitRedX+head:
+                if posRed_y >= fruitRedY and posRed_y <= fruitRedY+head:
+                    snakeLengthRed += 1
+                    fruitRedX = round(random.randrange(0,screenW-head)/10.0)*10.0
+                    fruitRedY = round(random.randrange(0,screenH-head)/10.0)*10.0
+        if flagB:
+            if posBlue_x >= fruitBlueX and posBlue_x <= fruitBlueX+head:
+                if posBlue_y >= fruitBlueY and posBlue_y <= fruitBlueY+head:
+                    snakeLengthBlue += 1
+                    fruitBlueX = round(random.randrange(0,screenW-head)/10.0)*10.0
+                    fruitBlueY = round(random.randrange(0,screenH-head)/10.0)*10.0
 
+        if flagB and flagR:
+            while fruitRedX == fruitBlueX:
+                fruitBlueX = round(random.randrange(0,screenW-fruitSize)/10.0)*10.0
+
+        if countRed > fps*5:
+            flagR = False
+        if countBlue > fps*5:
+            flagB = False
+            
         pgame.display.update()
         
-        clock.tick(20)
+        clock.tick(fps)
     
     gameScreen.fill(white)
     showMsg("Good Bye",blue)
@@ -217,7 +272,7 @@ def gameLoop():
 def main():
     gameScreen.fill(white)
     showMsg("Snakes All around !!",green,[screenW/2,screenH-575])
-    showMsg("Press 'P' to begin gameplay or 'Q' to Exit.",green,[screenW/2,screenH-550])
+    showMsg("Press 'P' to begin gameplay or 'E' to Exit.",green,[screenW/2,screenH-550])
     showMsg("During gameplay press 'P' to pause",green,[screenW/2,screenH-525])
 
     #Controls
@@ -236,9 +291,10 @@ def main():
     showMsg("J",Blue,[screenW/2+120,screenH/2+85])
     showMsg("K",Blue,[screenW/2+150,screenH/2+85])
     showMsg("L",Blue,[screenW/2+180,screenH/2+85])
-    
+
+    showMsg("(Note : If only one is played, then another disappears !!)",black,[screenW/2,screenH-125])
     showMsg("by kishanp",red,[screenW/2,screenH-75])
-    showMsg("kishanp challenge : Play if you can alone !! ",red,[screenW/2,screenH-50])
+    showMsg("challenge : Play if you can, alone !! gain double points",red,[screenW/2,screenH-50])
     pgame.display.update()
 
     while True:
@@ -249,7 +305,7 @@ def main():
             if event.type == pgame.KEYDOWN:
                 if event.key == pgame.K_p:
                     gameLoop()
-                elif event.key == pgame.K_q:
+                elif event.key == pgame.K_e:
                     gameScreen.fill(white)
                     showMsg("Good Bye",blue)
                     pgame.display.update()
@@ -257,10 +313,3 @@ def main():
                     quit()
 
 if __name__=="__main__":main()
-
-
-'''
-
-cx freeze download
-
-'''
