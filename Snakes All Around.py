@@ -216,11 +216,29 @@ def gameLoop():
 
 def main():
     gameScreen.fill(white)
-    showMsg("Snakes All around !!",green)
-    showMsg("by kishanp",red,[screenW/2,screenH-200])
-    showMsg("kishanp challenge : Play if you can alone !! ",red,[screenW/2,screenH-150])
-    showMsg("Press 'P' to begin gameplay or 'Q' to Exit.",green,[screenW/2,screenH-500])
-    showMsg("During gameplay press 'P' to pause",green,[screenW/2,screenH-400])
+    showMsg("Snakes All around !!",green,[screenW/2,screenH-575])
+    showMsg("Press 'P' to begin gameplay or 'Q' to Exit.",green,[screenW/2,screenH-550])
+    showMsg("During gameplay press 'P' to pause",green,[screenW/2,screenH-525])
+
+    #Controls
+    showMsg("Controls (color indicates the one to be controlled) in order",black)
+    showMsg("W",red,[screenW/2-150,screenH/2+50])
+    showMsg("A",red,[screenW/2-180,screenH/2+85])
+    showMsg("S",red,[screenW/2-150,screenH/2+85])
+    showMsg("D",red,[screenW/2-120,screenH/2+85])
+
+    showMsg("Up",black,[screenW/2,screenH/2+50])
+    showMsg("Left",black,[screenW/2-50,screenH/2+85])
+    showMsg("Down",black,[screenW/2,screenH/2+85])
+    showMsg("Right",black,[screenW/2+50,screenH/2+85])
+
+    showMsg("I",Blue,[screenW/2+150,screenH/2+50])
+    showMsg("J",Blue,[screenW/2+120,screenH/2+85])
+    showMsg("K",Blue,[screenW/2+150,screenH/2+85])
+    showMsg("L",Blue,[screenW/2+180,screenH/2+85])
+    
+    showMsg("by kishanp",red,[screenW/2,screenH-75])
+    showMsg("kishanp challenge : Play if you can alone !! ",red,[screenW/2,screenH-50])
     pgame.display.update()
 
     while True:
