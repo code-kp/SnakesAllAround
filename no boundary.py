@@ -32,7 +32,6 @@ def showMsg(msg,color,placing = [screenW/2,screenH/2],size = font):
     msgRect = toBeShown.get_rect()
     msgRect.center = placing[0],placing[1]
     gameScreen.blit(toBeShown,msgRect)
-  
 def pause():
     paused = True
     showMsg("Paused",black,size = largeFont)
@@ -235,6 +234,9 @@ def gameLoop():
                             showMsg("Red Crashed to blue !!",red)
                             pgame.display.update()
                             break
+
+        if gameOver:
+            continue
         
         if flagB:
             for xy in snakeListBlue[:-1]:
@@ -260,23 +262,37 @@ def gameLoop():
             continue
 
         if flagR:
-            pgame.draw.circle(gameScreen,white,(int(posRed_x + head/2),int(posRed_y + head/2)),1)
+            pgame.draw.circle(gameScreen,white,(int(posRed_x + head/2),int(posRed_y + head/2)),2)
         if flagB:
-            pgame.draw.circle(gameScreen,white,(int(posBlue_x + head/2),int(posBlue_y + head/2)),1)
+            pgame.draw.circle(gameScreen,white,(int(posBlue_x + head/2),int(posBlue_y + head/2)),2)
 
-    
+        check = False
         if flagR:
             if posRed_x >= fruitRedX and posRed_x <= fruitRedX+head:
                 if posRed_y >= fruitRedY and posRed_y <= fruitRedY+head:
-                    snakeLengthRed += 1
-                    fruitRedX = round(random.randrange(0,screenW-head)/10.0)*10.0
-                    fruitRedY = round(random.randrange(0,screenH-head)/10.0)*10.0
+                    check = True
+            if fruitRedX >= posRed_x and fruitRedX <= posRed_x + head:
+                if fruitRedY >= posRed_y and fruitRedY <= posRed_y + head:
+                    check = True
+
+            if check:
+                snakeLengthRed += 1
+                fruitRedX = round(random.randrange(0,screenW-head)/10.0)*10.0
+                fruitRedY = round(random.randrange(0,screenH-head)/10.0)*10.0
+
+        check = False         
         if flagB:
             if posBlue_x >= fruitBlueX and posBlue_x <= fruitBlueX+head:
                 if posBlue_y >= fruitBlueY and posBlue_y <= fruitBlueY+head:
-                    snakeLengthBlue += 1
-                    fruitBlueX = round(random.randrange(0,screenW-head)/10.0)*10.0
-                    fruitBlueY = round(random.randrange(0,screenH-head)/10.0)*10.0
+                    check = True
+            if fruitBlueX >= posBlue_x and fruitBlueX <= posBlue_x + head:
+                if fruitBlueY >= posBlue_y and fruitBlueY <= posBlue_y + head:
+                    check = True
+
+            if check:
+                snakeLengthBlue += 1
+                fruitBlueX = round(random.randrange(0,screenW-head)/10.0)*10.0
+                fruitBlueY = round(random.randrange(0,screenH-head)/10.0)*10.0
 
         if flagB and flagR:
             while fruitRedX == fruitBlueX:
